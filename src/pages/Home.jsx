@@ -2,23 +2,30 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, X, FileText } from "lucide-react";
-import valve1 from "../assets/slider/valve1.png";
-import valve2 from "../assets/slider/valve2.png";
-import valve3 from "../assets/slider/valve3.png";
-import valve4 from "../assets/slider/valve4.png";
+import valve1 from "../assets/slider/valve1.webp";
+import valve2 from "../assets/slider/valve2.webp";
+import valve3 from "../assets/slider/valve3.webp";
+import valve4 from "../assets/slider/valve4.webp";
 import { useProductRanges } from "../hooks/useProductRanges";
 import { useCertifications } from "../hooks/useCertifications";
-import { HomeSkeleton, RangeCardsSkeleton, CertsCarouselSkeleton } from "../components/Skeleton";
+import { RangeCardsSkeleton, CertsCarouselSkeleton } from "../components/Skeleton";
 
 const fadeUp = {
   initial: { opacity: 0, y: 24 },
   whileInView: { opacity: 1, y: 0 },
   viewport: { once: true, amount: 0.2 },
-  transition: { duration: 0.45 },
+  transition: { duration: 0.35 },
 };
 
 function useVisibleCount() {
-  const [count, setCount] = useState(1);
+  const [count, setCount] = useState(() => {
+    if (typeof window === "undefined") return 1;
+    const w = window.innerWidth;
+    if (w >= 1280) return 4;
+    if (w >= 1024) return 3;
+    if (w >= 640) return 2;
+    return 1;
+  });
 
   useEffect(() => {
     const update = () => {
@@ -28,8 +35,7 @@ function useVisibleCount() {
       else if (w >= 640) setCount(2);
       else setCount(1);
     };
-    update();
-    window.addEventListener("resize", update);
+    window.addEventListener("resize", update, { passive: true });
     return () => window.removeEventListener("resize", update);
   }, []);
 
@@ -61,12 +67,11 @@ export default function Home() {
   const prev = () => setStart((prev) => Math.max(prev - 1, 0));
 
   const sliderImages = useMemo(() => [valve1, valve2, valve3, valve4], []);
-
-  const pageLoading = rangesLoading && certsLoading;
-
-  if (pageLoading) {
-    return <HomeSkeleton />;
-  }
+  const slowSlides = useMemo(() => [...sliderImages, ...sliderImages], [sliderImages]);
+  const fastSlides = useMemo(
+    () => [...sliderImages].reverse().concat([...sliderImages].reverse()),
+    [sliderImages],
+  );
 
   return (
     <>
@@ -78,7 +83,7 @@ export default function Home() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.4 }}
             className="order-1 text-center md:text-left"
           >
             <p className="text-[#F59E0B] font-semibold tracking-wide text-xs sm:text-sm mb-3 uppercase">
@@ -111,82 +116,43 @@ export default function Home() {
             </div>
           </motion.div>
 
-          {/* Mobile dual vertical carousel */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="order-2 md:hidden w-full"
-          >
-            <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-white/[0.03] p-2.5 sm:p-3">
-              <div className="absolute top-0 left-0 w-full h-10 sm:h-12 bg-linear-to-b from-[#0F172A] to-transparent z-10 pointer-events-none" />
-              <div className="absolute bottom-0 left-0 w-full h-10 sm:h-12 bg-linear-to-t from-[#0F172A] to-transparent z-10 pointer-events-none" />
+          <div className="relative order-2 w-full">
+            <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-white/[0.03] p-2.5 sm:p-3 md:border-0 md:bg-transparent md:p-0 md:rounded-none">
+              <div className="absolute top-0 left-0 w-full h-10 sm:h-12 md:h-16 bg-linear-to-b from-[#0F172A] to-transparent z-10 pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-full h-10 sm:h-12 md:h-16 bg-linear-to-t from-[#0F172A] to-transparent z-10 pointer-events-none" />
 
-              <div className="grid grid-cols-2 gap-2.5 sm:gap-3 h-[300px] sm:h-[380px] overflow-hidden">
-                <div className="overflow-hidden rounded-xl">
-                  <div className="slider-slow space-y-2.5 sm:space-y-3">
-                    {[...sliderImages, ...sliderImages].map((img, index) => (
+              <div className="grid grid-cols-2 gap-2.5 sm:gap-3 md:gap-6 h-[300px] sm:h-[380px] md:h-105 overflow-hidden">
+                <div className="overflow-hidden rounded-xl md:rounded-none">
+                  <div className="slider-slow space-y-2.5 sm:space-y-3 md:space-y-6">
+                    {slowSlides.map((img, index) => (
                       <img
-                        key={`m-slow-${index}`}
+                        key={`slow-${index}`}
                         src={img}
-                        alt="Valve"
-                        className="w-full aspect-[4/5] rounded-xl shadow-lg object-cover"
+                        alt=""
+                        width={640}
+                        height={640}
+                        decoding="async"
+                        fetchPriority={index === 0 ? "high" : "low"}
+                        className="w-full aspect-[4/5] md:aspect-auto rounded-xl shadow-lg object-cover"
                       />
                     ))}
                   </div>
                 </div>
 
-                <div className="overflow-hidden rounded-xl">
-                  <div className="slider-fast space-y-2.5 sm:space-y-3">
-                    {[...sliderImages]
-                      .reverse()
-                      .concat([...sliderImages].reverse())
-                      .map((img, index) => (
-                        <img
-                          key={`m-fast-${index}`}
-                          src={img}
-                          alt="Valve"
-                          className="w-full aspect-[4/5] rounded-xl shadow-lg object-cover"
-                        />
-                      ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Desktop dual vertical slider */}
-          <div className="relative hidden md:block order-2">
-            <div className="absolute top-0 left-0 w-full h-16 bg-linear-to-b from-[#0F172A] to-transparent z-10" />
-            <div className="absolute bottom-0 left-0 w-full h-16 bg-linear-to-t from-[#0F172A] to-transparent z-10" />
-
-            <div className="grid grid-cols-2 gap-6 h-105 overflow-hidden">
-              <div className="overflow-hidden">
-                <div className="slider-slow space-y-6">
-                  {[...sliderImages, ...sliderImages].map((img, index) => (
-                    <img
-                      key={`slow-${index}`}
-                      src={img}
-                      alt="Valve"
-                      className="w-full rounded-xl shadow-lg object-cover"
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <div className="overflow-hidden">
-                <div className="slider-fast space-y-6">
-                  {[...sliderImages]
-                    .reverse()
-                    .concat([...sliderImages].reverse())
-                    .map((img, index) => (
+                <div className="overflow-hidden rounded-xl md:rounded-none">
+                  <div className="slider-fast space-y-2.5 sm:space-y-3 md:space-y-6">
+                    {fastSlides.map((img, index) => (
                       <img
                         key={`fast-${index}`}
                         src={img}
-                        alt="Valve"
-                        className="w-full rounded-xl shadow-lg object-cover"
+                        alt=""
+                        width={640}
+                        height={640}
+                        decoding="async"
+                        className="w-full aspect-[4/5] md:aspect-auto rounded-xl shadow-lg object-cover"
                       />
                     ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -194,7 +160,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-12 sm:py-16 bg-[#F8FAFC]">
+      <section className="py-12 sm:py-16 bg-[#F8FAFC] content-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <motion.div {...fadeUp} className="flex justify-between items-end gap-4 mb-8 sm:mb-10">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#0F172A]">
@@ -219,7 +185,7 @@ export default function Home() {
                   initial={{ opacity: 0, y: 16 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: index * 0.06, duration: 0.35 }}
+                  transition={{ delay: Math.min(index * 0.05, 0.2), duration: 0.3 }}
                 >
                   <Link
                     to={`/products?category=${encodeURIComponent(product.name)}`}
@@ -229,6 +195,8 @@ export default function Home() {
                       <img
                         src={product.image_url}
                         alt={product.name}
+                        loading="lazy"
+                        decoding="async"
                         className="max-h-full max-w-full object-contain group-hover:scale-110 transition duration-300"
                       />
                     </div>
@@ -244,7 +212,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-12 sm:py-16 bg-white">
+      <section className="py-12 sm:py-16 bg-white content-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="w-16 h-1 bg-[#F59E0B] mx-auto mb-6" />
           <motion.div {...fadeUp} className="text-center mb-10 sm:mb-12">
@@ -280,7 +248,7 @@ export default function Home() {
                 initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: index * 0.06 }}
+                transition={{ delay: Math.min(index * 0.05, 0.2) }}
                 className="p-5 sm:p-6 rounded-xl border border-gray-100 hover:shadow-xl hover:border-[#F59E0B]/30 transition duration-300"
               >
                 <h3 className="text-lg sm:text-xl font-semibold text-[#0F172A] mb-3">
@@ -293,7 +261,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-12 sm:py-20 bg-[#F8FAFC]">
+      <section className="py-12 sm:py-20 bg-[#F8FAFC] content-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <motion.h2
             {...fadeUp}
@@ -338,6 +306,8 @@ export default function Home() {
                           <img
                             src={item.image_url}
                             alt={item.title || "Certificate"}
+                            loading="lazy"
+                            decoding="async"
                             className="max-w-full max-h-56 sm:max-h-72 w-auto h-auto object-contain group-hover:scale-[1.03] transition duration-300"
                           />
                         </div>
@@ -366,7 +336,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-12 sm:py-16 bg-[#0F172A] text-white">
+      <section className="py-12 sm:py-16 bg-[#0F172A] text-white content-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
           <motion.h2
             {...fadeUp}

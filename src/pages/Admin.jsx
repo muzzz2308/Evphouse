@@ -277,10 +277,14 @@ export default function Admin() {
   const [tab, setTab] = useState("products");
   const [toast, setToast] = useState(null);
 
-  const { products, loading: productsLoading, refresh: refreshProducts } = useProducts();
-  const { ranges, loading: rangesLoading, refresh: refreshRanges } = useProductRanges();
+  const { products, loading: productsLoading, refresh: refreshProducts } = useProducts({
+    blocking: true,
+  });
+  const { ranges, loading: rangesLoading, refresh: refreshRanges } = useProductRanges({
+    blocking: true,
+  });
   const { certifications, loading: certsLoading, refresh: refreshCerts } =
-    useCertifications();
+    useCertifications({ blocking: true });
 
   const [productForm, setProductForm] = useState(null);
   const [rangeForm, setRangeForm] = useState(null);

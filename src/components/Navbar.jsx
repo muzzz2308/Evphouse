@@ -10,6 +10,17 @@ const navItems = [
   { to: "/contact", label: "Contact", icon: Phone },
 ];
 
+function prefetchRoute(path) {
+  if (path === "/products") {
+    import("../pages/Products");
+    import("../hooks/useProducts").then((m) => m.prefetchProducts());
+  } else if (path === "/about") {
+    import("../pages/About");
+  } else if (path === "/contact") {
+    import("../pages/Contact");
+  }
+}
+
 const linkClass = ({ isActive }) =>
   `transition ${isActive ? "text-[#F59E0B]" : "hover:text-[#F59E0B]"}`;
 
@@ -105,15 +116,27 @@ export default function Navbar() {
           <NavLink to="/" end className={linkClass}>
             Home
           </NavLink>
-          <NavLink to="/products" className={linkClass}>
+          <NavLink
+            to="/products"
+            className={linkClass}
+            onMouseEnter={() => prefetchRoute("/products")}
+            onFocus={() => prefetchRoute("/products")}
+          >
             Products
           </NavLink>
-          <NavLink to="/about" className={linkClass}>
+          <NavLink
+            to="/about"
+            className={linkClass}
+            onMouseEnter={() => prefetchRoute("/about")}
+            onFocus={() => prefetchRoute("/about")}
+          >
             About
           </NavLink>
           <Link
             to="/contact"
             className="bg-[#F59E0B] text-black px-4 py-2 rounded-md font-semibold hover:opacity-90 transition"
+            onMouseEnter={() => prefetchRoute("/contact")}
+            onFocus={() => prefetchRoute("/contact")}
           >
             RFQ
           </Link>
@@ -172,6 +195,8 @@ export default function Navbar() {
                         to={item.to}
                         end={item.end}
                         onClick={() => setOpen(false)}
+                        onMouseEnter={() => prefetchRoute(item.to)}
+                        onFocus={() => prefetchRoute(item.to)}
                         className={`group flex items-center gap-4 rounded-2xl px-3 py-3.5 transition ${
                           active ? "bg-white/5" : "hover:bg-white/[0.03]"
                         }`}

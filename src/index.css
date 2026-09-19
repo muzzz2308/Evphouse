@@ -53,12 +53,23 @@ a[aria-disabled="true"] {
   animation-play-state: paused;
 }
 
+.slider-slow,
+.slider-fast {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
 .slider-slow {
   animation: verticalSlideSlow 20s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 .slider-fast {
   animation: verticalSlideFast 14s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.content-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 640px;
 }
 
 @media (max-width: 767px) {

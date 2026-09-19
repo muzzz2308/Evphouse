@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="EV House">
+  <rect width="32" height="32" rx="7" fill="#0F172A"/>
+  <path fill="#E87B12" d="M16.1 5.4 28 15.2h-3.1V26H7.1V15.2H4L16.1 5.4Z"/>
+  <!-- industrial valve -->
+  <circle cx="16" cy="13.35" r="2.45" fill="#0F172A"/>
+  <circle cx="16" cy="13.35" r="0.85" fill="#E87B12"/>
+  <rect x="15.2" y="15.55" width="1.6" height="2.35" rx="0.25" fill="#0F172A"/>
+  <polygon points="16,17.5 19.35,19.7 16,21.9 12.65,19.7" fill="#0F172A"/>
+  <rect x="8.7" y="18.95" width="4.3" height="1.5" rx="0.4" fill="#0F172A"/>
+  <rect x="19" y="18.95" width="4.3" height="1.5" rx="0.4" fill="#0F172A"/>
+</svg>

@@ -1,43 +1,53 @@
 import { useCallback, useEffect, useState } from "react";
-import { isSupabaseConfigured, supabase } from "../lib/supabase";
 import { fallbackProductRanges } from "../data/fallback";
+import { loadRemoteList, peekCache } from "../lib/dataCache";
 
-export function useProductRanges() {
-  const [ranges, setRanges] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [usingFallback, setUsingFallback] = useState(false);
+const RANGES_KEY = "product_ranges";
+const RANGES_SELECT = "id,name,image_url,sort_order";
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+function loadRanges(force = false) {
+  return loadRemoteList({
+    key: RANGES_KEY,
+    table: "product_ranges",
+    fallback: fallbackProductRanges,
+    select: RANGES_SELECT,
+    force,
+  });
+}
 
-    if (!isSupabaseConfigured || !supabase) {
-      setRanges(fallbackProductRanges);
-      setUsingFallback(true);
+export function prefetchProductRanges() {
+  return loadRanges(false);
+}
+
+export function useProductRanges({ blocking = false } = {}) {
+  const cached = peekCache(RANGES_KEY);
+  const [ranges, setRanges] = useState(
+    () => cached?.data ?? (blocking ? [] : fallbackProductRanges),
+  );
+  const [loading, setLoading] = useState(() => blocking && !cached);
+  const [error, setError] = useState(cached?.error ?? null);
+  const [usingFallback, setUsingFallback] = useState(
+    cached?.usingFallback ?? !cached,
+  );
+
+  const refresh = useCallback(
+    async (force = true) => {
+      if (force || (blocking && !peekCache(RANGES_KEY))) setLoading(true);
+      setError(null);
+
+      const result = await loadRanges(force);
+      setRanges(result.data);
+      setUsingFallback(result.usingFallback);
+      setError(result.error);
       setLoading(false);
-      return;
-    }
-
-    const { data, error: fetchError } = await supabase
-      .from("product_ranges")
-      .select("*")
-      .order("sort_order", { ascending: true });
-
-    if (fetchError) {
-      setError(fetchError.message);
-      setRanges(fallbackProductRanges);
-      setUsingFallback(true);
-    } else {
-      setRanges(data ?? []);
-      setUsingFallback(false);
-    }
-    setLoading(false);
-  }, []);
+      return result;
+    },
+    [blocking],
+  );
 
   useEffect(() => {
-    refresh();
+    refresh(false);
   }, [refresh]);
 
-  return { ranges, loading, error, usingFallback, refresh };
+  return { ranges, loading, error, usingFallback, refresh: () => refresh(true) };
 }

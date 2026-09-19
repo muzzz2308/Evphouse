@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, MapPin, Phone, Clock } from "lucide-react";
-import { usePageSkeleton } from "../hooks/usePageSkeleton";
-import { ContactSkeleton } from "../components/Skeleton";
+
+const MAP_SRC =
+  "https://www.google.com/maps?q=Karachi%20Pakistan&output=embed";
 
 export default function Contact() {
-  const pageLoading = usePageSkeleton();
+  const [mapLoaded, setMapLoaded] = useState(false);
   const [form, setForm] = useState({
     name: "",
     company: "",
@@ -45,10 +46,6 @@ export default function Contact() {
     }
   };
 
-  if (pageLoading) {
-    return <ContactSkeleton />;
-  }
-
   const inputClass =
     "w-full bg-white/10 border border-white/20 px-4 py-3 rounded-lg placeholder-gray-300 focus:outline-none focus:border-[#F59E0B] text-sm sm:text-base";
 
@@ -68,15 +65,26 @@ export default function Contact() {
         </p>
       </div>
 
-      <div className="w-full h-56 sm:h-80 md:h-112.5 mb-8 sm:mb-10">
-        <iframe
-          title="Elite Valve Location"
-          src="https://www.google.com/maps?q=Karachi%20Pakistan&output=embed"
-          width="100%"
-          height="100%"
-          loading="lazy"
-          className="border-0"
-        />
+      <div className="w-full h-56 sm:h-80 md:h-112.5 mb-8 sm:mb-10 bg-[#1E293B]">
+        {mapLoaded ? (
+          <iframe
+            title="Elite Valve Location"
+            src={MAP_SRC}
+            width="100%"
+            height="100%"
+            loading="lazy"
+            className="border-0"
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={() => setMapLoaded(true)}
+            className="w-full h-full flex flex-col items-center justify-center gap-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition"
+          >
+            <MapPin size={22} className="text-[#F59E0B]" />
+            Load map
+          </button>
+        )}
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-16 sm:pb-20 grid md:grid-cols-2 gap-10 md:gap-12 items-start">

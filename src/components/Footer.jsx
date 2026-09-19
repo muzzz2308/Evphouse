@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-import AdminLoginModal from "./AdminLoginModal";
+
+const AdminLoginModal = lazy(() => import("./AdminLoginModal"));
 
 export default function Footer() {
   const [loginOpen, setLoginOpen] = useState(false);
@@ -10,7 +11,7 @@ export default function Footer() {
   const navigate = useNavigate();
 
   const scrollTop = () => {
-    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    window.scrollTo(0, 0);
   };
 
   const handleAdminClick = (e) => {
@@ -106,7 +107,11 @@ export default function Footer() {
         </div>
       </footer>
 
-      <AdminLoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
+      {loginOpen && (
+        <Suspense fallback={null}>
+          <AdminLoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
+        </Suspense>
+      )}
     </>
   );
 }

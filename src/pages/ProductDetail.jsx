@@ -61,6 +61,7 @@ export default function ProductDetail() {
             <img
               src={imageSrc}
               alt={product.name}
+              decoding="async"
               className="max-h-72 sm:max-h-87.5 w-full object-contain transition duration-500 group-hover:scale-105"
             />
           </motion.div>
@@ -150,6 +151,8 @@ export default function ProductDetail() {
                     <img
                       src={item.image_url || item.image}
                       alt={item.name}
+                      loading="lazy"
+                      decoding="async"
                       className="max-h-full object-contain group-hover:scale-105 transition"
                     />
                   </div>

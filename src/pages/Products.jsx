@@ -1,6 +1,5 @@
 import { useEffect, useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
 import { useProducts } from "../hooks/useProducts";
 import { ProductsSkeleton } from "../components/Skeleton";
 
@@ -18,7 +17,7 @@ export default function Products() {
   const active = categories.includes(categoryFromURL) ? categoryFromURL : "All";
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo(0, 0);
   }, [active]);
 
   useEffect(() => {
@@ -52,7 +51,6 @@ export default function Products() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
-        {/* Sticky mobile-friendly filter bar */}
         <div className="sticky top-16 z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 mb-8 sm:mb-12 bg-[#F8FAFC]/95 backdrop-blur-sm border-b border-gray-100/80">
           <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-1 scrollbar-thin justify-start sm:justify-center">
             {categories.map((cat) => (
@@ -84,38 +82,32 @@ export default function Products() {
             </button>
           </div>
         ) : (
-          <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8">
-            <AnimatePresence mode="popLayout">
-              {filtered.map((product) => (
-                <motion.div
-                  key={product.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.96 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.96 }}
-                  transition={{ duration: 0.25 }}
-                  className="bg-white rounded-xl shadow-md hover:shadow-xl transition duration-300 overflow-hidden group"
-                >
-                  <Link to={`/products/${product.id}`}>
-                    <div className="h-52 sm:h-64 flex items-center justify-center bg-gray-50">
-                      <img
-                        src={product.image_url || product.image}
-                        alt={product.name}
-                        loading="lazy"
-                        className="h-full w-full object-contain p-6 group-hover:scale-105 transition duration-300"
-                      />
-                    </div>
-                    <div className="p-4 text-center border-t border-gray-50">
-                      <h3 className="text-base sm:text-lg font-semibold text-[#0F172A]">
-                        {product.name}
-                      </h3>
-                      <p className="text-xs text-gray-400 mt-1">{product.category}</p>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </motion.div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8">
+            {filtered.map((product) => (
+              <div
+                key={product.id}
+                className="bg-white rounded-xl shadow-md hover:shadow-xl transition duration-300 overflow-hidden group"
+              >
+                <Link to={`/products/${product.id}`}>
+                  <div className="h-52 sm:h-64 flex items-center justify-center bg-gray-50">
+                    <img
+                      src={product.image_url || product.image}
+                      alt={product.name}
+                      loading="lazy"
+                      decoding="async"
+                      className="h-full w-full object-contain p-6 group-hover:scale-105 transition duration-300"
+                    />
+                  </div>
+                  <div className="p-4 text-center border-t border-gray-50">
+                    <h3 className="text-base sm:text-lg font-semibold text-[#0F172A]">
+                      {product.name}
+                    </h3>
+                    <p className="text-xs text-gray-400 mt-1">{product.category}</p>
+                  </div>
+                </Link>
+              </div>
+            ))}
+          </div>
         )}
 
         <div className="text-center mt-12 sm:mt-16">

@@ -1,21 +1,13 @@
 import { motion } from "framer-motion";
-import { usePageSkeleton } from "../hooks/usePageSkeleton";
-import { AboutSkeleton } from "../components/Skeleton";
 
 const fadeUp = {
   initial: { opacity: 0, y: 20 },
   whileInView: { opacity: 1, y: 0 },
   viewport: { once: true, amount: 0.2 },
-  transition: { duration: 0.4 },
+  transition: { duration: 0.35 },
 };
 
 const About = () => {
-  const loading = usePageSkeleton();
-
-  if (loading) {
-    return <AboutSkeleton />;
-  }
-
   return (
     <div className="bg-gray-50">
       <section className="bg-[#0F172A] text-white py-16 sm:py-24">
@@ -38,8 +30,12 @@ const About = () => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 grid md:grid-cols-2 gap-8 md:gap-12 items-center">
           <motion.img
             {...fadeUp}
-            src="/images/about-img.jpg"
+            src="/images/about-img.webp"
             alt="Valve"
+            width={1400}
+            height={933}
+            loading="lazy"
+            decoding="async"
             className="rounded-xl shadow-lg w-full object-cover max-h-80 md:max-h-none"
           />
 

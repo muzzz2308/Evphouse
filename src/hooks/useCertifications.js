@@ -1,43 +1,59 @@
 import { useCallback, useEffect, useState } from "react";
-import { isSupabaseConfigured, supabase } from "../lib/supabase";
 import { fallbackCertifications } from "../data/fallback";
+import { loadRemoteList, peekCache } from "../lib/dataCache";
 
-export function useCertifications() {
-  const [certifications, setCertifications] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [usingFallback, setUsingFallback] = useState(false);
+const CERTS_KEY = "certifications";
+const CERTS_SELECT = "id,title,image_url,pdf_url,sort_order";
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+function loadCertifications(force = false) {
+  return loadRemoteList({
+    key: CERTS_KEY,
+    table: "certifications",
+    fallback: fallbackCertifications,
+    select: CERTS_SELECT,
+    force,
+  });
+}
 
-    if (!isSupabaseConfigured || !supabase) {
-      setCertifications(fallbackCertifications);
-      setUsingFallback(true);
+export function prefetchCertifications() {
+  return loadCertifications(false);
+}
+
+export function useCertifications({ blocking = false } = {}) {
+  const cached = peekCache(CERTS_KEY);
+  const [certifications, setCertifications] = useState(
+    () => cached?.data ?? (blocking ? [] : fallbackCertifications),
+  );
+  const [loading, setLoading] = useState(() => blocking && !cached);
+  const [error, setError] = useState(cached?.error ?? null);
+  const [usingFallback, setUsingFallback] = useState(
+    cached?.usingFallback ?? !cached,
+  );
+
+  const refresh = useCallback(
+    async (force = true) => {
+      if (force || (blocking && !peekCache(CERTS_KEY))) setLoading(true);
+      setError(null);
+
+      const result = await loadCertifications(force);
+      setCertifications(result.data);
+      setUsingFallback(result.usingFallback);
+      setError(result.error);
       setLoading(false);
-      return;
-    }
-
-    const { data, error: fetchError } = await supabase
-      .from("certifications")
-      .select("*")
-      .order("sort_order", { ascending: true });
-
-    if (fetchError) {
-      setError(fetchError.message);
-      setCertifications(fallbackCertifications);
-      setUsingFallback(true);
-    } else {
-      setCertifications(data ?? []);
-      setUsingFallback(false);
-    }
-    setLoading(false);
-  }, []);
+      return result;
+    },
+    [blocking],
+  );
 
   useEffect(() => {
-    refresh();
+    refresh(false);
   }, [refresh]);
 
-  return { certifications, loading, error, usingFallback, refresh };
+  return {
+    certifications,
+    loading,
+    error,
+    usingFallback,
+    refresh: () => refresh(true),
+  };
 }
